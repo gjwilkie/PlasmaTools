@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-include("../src/PlasmaTools.jl")
 using PlasmaTools
 using Base.Test
 
@@ -55,7 +54,9 @@ x = 8.0
 
 # Test slowing-down time
 
-# Test solver for simple problem
+# Test solver for simple problem, advection only
+
+# Test solver for simple problem, diffusion only
 
 # Test that collision operator vanishes for Maxwellian
 collop = collisionOperator(vgrid,helium3,bulkspecs)
