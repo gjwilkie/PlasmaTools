@@ -1,0 +1,70 @@
+\documentclass[12pt]{article}
+\include{include}
+
+\title{Description of matrix operator for finite-volume form of advection-diffusion equation}
+
+\author{George J. Wilkie}
+
+\begin{document}
+\maketitle
+%\tableofcontents
+
+%\section{Introduction}
+
+We seek to descritize an operator of the form:
+\begin{equation} \label{maineqn}
+   M\left[f \right] = \frac{1}{J} \pd{ }{x} \left( J \Gamma \right) =  \frac{1}{J} \pd{ }{x} \left[ J A f + J D  \pd{f}{x} \right]
+\end{equation}
+using a finite-volume method with piecewise constant elements. Each element has a average/constant value of $f$ and $x$ given by $f_i$ and $x_i$, respectively, for $1 \leq i \leq N$. The fluxes $\Gamma_{i+1/2}$ and $\Gamma_{i-1/2}$ are defined on the mesh faces $x_{i+1/2}$ and $x_{i-1/2}$. The Jacobian of the (arbitrary) coordinate $x$ is $J(x)$. Using the average of the adjacent cells to represent the value of $f$ at the cell boundary, we can descritize Eq. \ref{maineqn} as:
+\begin{align}
+   M\left[ f_i \right] \approx& \frac{1}{J_i} \frac{1}{x_{i+1/2} - x_{i-1/2}} \left[ \left(JA\right)_{i+1/2} \frac{f_{i+1} + f_i }{2}  -  \left(JA\right)_{i-1/2} \frac{ f_{i} + f_{i-1} }{2}   \right. \nonumber\\
+   & \left. + \left(JD \right)_{i+1/2}\frac{ f_{i+1} - f_i }{v_{i+1}-v_i} - \left(JD \right)_{i-1/2} \frac{ f_{i} - f_{i-1} }{v_{i}-v_{i-1}}  \right]  \\
+   =&  a_{i-1} f_{i-1} +  b_i f_i + c_{i+1} f_{i+1}  .
+\end{align}
+The tridiagonal coefficients for interior points are given by:
+\begin{equation}
+   a_{i-1} = \frac{1}{J_i \left( x_{i+1/2} - x_{i-1/2} \right)} \left[- \frac{1}{2}\left(JA\right)_{i-1/2} + \frac{\left(JD\right)_{i-1/2} }{ x_{i}-x_{i-1}} \right]
+\end{equation}
+\begin{equation}
+   b_{i} = \frac{1}{J_i \left( x_{i+1/2} - x_{i-1/2} \right)} \left[ \frac{1}{2}\left(JA\right)_{i+1/2} - \frac{1}{2}\left(JA\right)_{i-1/2} - \frac{\left(JD\right)_{i+1/2} }{ x_{i+1}-x_i} - \frac{\left(JD\right)_{i-1/2} }{ x_{i}-x_{i-1}} \right]
+\end{equation}
+\begin{equation}
+   c_{i+1} = \frac{1}{J_i \left( x_{i+1/2} - x_{i-1/2} \right)} \left[ \frac{1}{2}\left(JA\right)_{i+1/2} + \frac{\left(JD\right)_{i+1/2} }{ x_{i+1}-x_i} \right]
+\end{equation}
+
+For Dirichlet boundary conditions, these are replaced by unity on the diagonal element, and zeros elsewhere. For flux-specified boundary conditions at $i=1$:
+\begin{equation}
+   M\left[ f_1 \right] \approx \frac{1}{J_1} \frac{1}{x_{3/2} - x_{1/2}} \left[ \left(JA\right)_{3/2} \frac{f_{2} + f_1 }{2}  + \left(JD \right)_{3/2}\frac{ f_{2} - f_1 }{v_{2}-v_1}   \right]  
+\end{equation}
+and
+\begin{equation}
+   b_{1} = \frac{1}{J_1 \left( x_{3/2} - x_{1/2} \right)} \left[ \frac{1}{2}\left(JA\right)_{3/2} - \frac{\left(JD\right)_{3/2} }{ x_{2}-x_1} \right]
+\end{equation}
+\begin{equation}
+   c_{2} = \frac{1}{J_1 \left( x_{3/2} - x_{1/2} \right)} \left[ \frac{1}{2}\left(JA\right)_{3/2} + \frac{\left(JD\right)_{3/2} }{ x_{2}-x_1} \right],
+\end{equation}
+while the incoming flux $\Gamma_{1/2} = \Gamma\left(x_{1/2}\right)$ is given and the following must be added to the source:
+\begin{equation}
+   \Delta S_1  = \frac{J_{1/2} \Gamma_{1/2}}{J_1 \left( x_{3/2} - x_{1/2} \right)}.
+\end{equation}
+For flux conditions on the right side, we have similarly:
+\begin{equation}
+   M\left[ f_N \right] \approx \frac{1}{J_N} \frac{1}{x_{N+1/2} - x_{N-1/2}} \left[ -  \left(JA\right)_{N-1/2} \frac{ f_{N} + f_{N-1} }{2}  - \left(JD \right)_{N-1/2} \frac{ f_{N} - f_{N-1} }{v_{N}-v_{N-1}}  \right]  \\
+\end{equation}
+\begin{equation}
+   a_{N-1} = \frac{1}{J_N \left( x_{N+1/2} - x_{N-1/2} \right)} \left[- \frac{1}{2}\left(JA\right)_{N-1/2} + \frac{\left(JD\right)_{N-1/2} }{ x_{N}-x_{N-1}} \right]
+\end{equation}
+\begin{equation}
+   b_{N} = \frac{1}{J_N \left( x_{N+1/2} - x_{N-1/2} \right)} \left[ - \frac{1}{2}\left(JA\right)_{N-1/2} - \frac{\left(JD\right)_{N-1/2} }{ x_{N}-x_{N-1}} \right]
+\end{equation}
+\begin{equation}
+   \Delta S_N  = \frac{- J_{N+1/2} \Gamma_{N+1/2}}{J_N \left( x_{N+1/2} - x_{N-1/2} \right)}.
+\end{equation}
+
+
+
+
+
+
+
+\end{document}
