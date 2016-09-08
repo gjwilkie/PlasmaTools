@@ -55,6 +55,20 @@ x = 8.0
 # Test slowing-down time
 
 # Test solver for simple problem, advection only
+f0anal = exp(-vgrid.ctr.^2/vti^2)
+A0 = 5.0
+D0 = 1.0
+onefunc(x) = 1.0
+Afunc(x) = A0
+Dfunc(x) = D0
+source = f0anal.*( (D0/vti^2)*(4.0*(vgrid.ctr.^2/vti^2) - 2.0) - 2.0*vgrid.ctr*A0/vti^2)
+
+operator = createAdvecDiffOperator(vgrid,onefunc,Afunc,Dfunc,[0.0,0.0],source)
+f0test = operator\source
+println(f0test)
+println(f0anal)
+@test_approx_eq_eps(f0test,f0anal,1.0e-3)
+
 
 # Test solver for simple problem, diffusion only
 
