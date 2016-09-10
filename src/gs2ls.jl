@@ -1,4 +1,4 @@
-module gs2ls
+#module gs2ls
 using NetCDF
 
 export createInputFile
@@ -26,6 +26,7 @@ type GS2params
    nx::Int64
    ny::Int64
    ntheta::Int64
+   nperiod::Int64
    negrid::Int64
    ngauss::Int64
    delt::Float64
@@ -35,15 +36,13 @@ type GS2params
    beta::Float64
    fapar::Float64
    fbpar::Float64
-   nonlin::Bool
+   linear::Bool
 
    millergeom::Bool
 
-   akx::Float64
-   aky::Float64
-   pk::Float64
+   kx::Float64
+   ky::Float64
    qinp::Float64
-   nperiod::Int64
 
    akappa::Float64
    akappri::Float64
@@ -54,14 +53,23 @@ type GS2params
    s_hat_input::Float64
    beta_prime_input::Float64
    rmaj::Float64
-   rhoc::Int64
-   rmaj::Float64
+   rhoc::Float64
    r_geo::Float64
    eps::Float64
    epsl::Float64
    irho::Int64
+   equilibrium_option::ASCIIString
+   cpu_time::Float64
+   runname::ASCIIString
+   fluxe::Bool
+   fluxemu::Bool
+   writephi::Bool
 
-   avail_cpu_time=Float64
+   # internal logic: linear
+
+   # required always: ntheta, p.rhoc, equilibrium_option,shat, qinp, ngauss, negrid, fapar, fbpar, delt, cpu_time, spec, runname, fluxe, fluxemu,writephi
+
+   # optional parameters: beta, tite, ky, kx, nx,ny, y0, nperiod, irho, rmaj, akappa, akappri,tri,tripri
 end
 
 """
@@ -112,12 +120,12 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
    dict = Dict("beta"=>p.beta,"zeff"=>zeff,"tite"=>p.tite)
    writeNamelist(f, "parameters", dict)
 
-   linear ? grid_option = "single" : grid_option = "box"
+   p.linear ? grid_option = "single" : grid_option = "box"
 
    dict = Dict("grid_option"=>grid_option)
    writeNamelist(f, "kt_grids_knobs", dict)
 
-   if linear 
+   if p.linear 
       dict = Dict("aky"=>p.ky,"akx"=>p.kx,"theta0"=>0.0)
       writeNamelist(f, "kt_grids_box_parameters", dict)
    else
@@ -126,7 +134,8 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
       writeNamelist(f, "kt_grids_box_parameters", dict)
    end
 
-   !linear ? p.nperiod = 1
+   !p.linear ? nper = 1 : nper = p.nperiod
+#   ~p.linear && p.nperiod = 1 
 
    # TODO: Calculate beta_prime and shift
 
@@ -138,7 +147,7 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
       dict = Dict("equilibrium_option"=>equilibrium_option)
       writeNamelist(f, "theta_grid_knobs", dict)
 
-      dict = Dict("ntheta"=>p.ntheta,"nperiod"=>p.nperiod,"rhoc"=>p.rhoc,"qinp"=>p.qinp,"shat"=>p.shat,"rmaj"=>p.rmaj,"r_geo"=>p.r_geo,"akappa"=>p.akappa,"akappri"=>p.akappri,"tri"=>p.tri,"tripri"=>p.tripri)
+      dict = Dict("ntheta"=>p.ntheta,"nperiod"=>nper,"rhoc"=>p.rhoc,"qinp"=>p.qinp,"shat"=>p.shat,"rmaj"=>p.rmaj,"r_geo"=>p.r_geo,"akappa"=>p.akappa,"akappri"=>p.akappri,"tri"=>p.tri,"tripri"=>p.tripri)
       writeNamelist(f, "theta_grid_parameters", dict)
 
       dict = Dict("iflux"=>0,"itor"=>1,"irho"=>p.irho,"local_eq"=>true,"bishop"=>4,"delrho"=>0.001,"s_hat_input"=>p.shat)
@@ -158,7 +167,7 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
    writeNamelist(f, "fields_knobs", Dict("field_option"=>"implicit"))
 
    # TODO: Guess timestep and cpu_time
-   dict = Dict("fphi"=>1.0,"fapar"=>p.fapar,"fbpar"=>p.fbpar,"delt"=>p.delt,"nstep"=>1000000,"avail_cpu_time"=p.cpu_time)
+   dict = Dict("fphi"=>1.0,"fapar"=>p.fapar,"fbpar"=>p.fbpar,"delt"=>p.delt,"nstep"=>1000000,"avail_cpu_time"=>p.cpu_time)
    writeNamelist(f, "knobs", dict)
 
    writeNamelist(f, "reinit_knobs", Dict("delt_adj"=>4.0,"delt_minimum"=>1.0e-8,"abort_rapid_time_step_change"=>true))
@@ -219,14 +228,9 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
    push!(dict,("write_phi_over_time",p.writephi))
    writeNamelist(f,"gs2_diagnostics_knobs",dict)
 
-   # internal logic: linear
-
-   # required always: ntheta, p.rhoc, equilibrium_option,shat, qinp, ngauss, negrid, fapar, fbpar, delt, cpu_time, spec, runname, fluxe, fluxemu,writephi
-
-   # optional parameters: beta, tite, ky, kx, nx,ny, y0, nperiod, irho, rmaj, akappa, akappri,tri,tripri
 
    close(f)
    
 end
 
-end
+#end
