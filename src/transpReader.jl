@@ -7,7 +7,7 @@ plotSummary(file::ASCIIString)
 
 Displays a set of time-dependent plots of relevant plasma quantities. Useful for determining the overall health of the run and ideal time samples.
 """
-function plotSummary(file::ASCIIString)
+function plotTranspSummary(file::ASCIIString)
 
    t = ncread(file,"TIME")
    Ti0 = ncread(file,"TI0")
@@ -17,6 +17,7 @@ function plotSummary(file::ASCIIString)
 
    #TODO: Add some kind of global diagnostic of fast ions
 
+
 end
 
 """
@@ -24,7 +25,7 @@ plotSummary(file::ASCIIString,time::Float64)
 
 Displays a set of radius-dependent plots of relevant plasma quantities at the given time.
 """
-function plotSummary(file::ASCIIString,time::Float64)
+function plotTranspSummary(file::ASCIIString,time::Float64)
 
    # TODO: Make radial plots
    kappa = ncread(file,"ELONG")[1,:]
