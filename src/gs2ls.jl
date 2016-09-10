@@ -1,4 +1,7 @@
+module gs2ls
 using NetCDF
+
+export createInputFile
 
 """
 GS2species: an encapsulation of data related to each species in a gs2 input file
@@ -70,13 +73,13 @@ function writeNamelist(file::IOStream,namelist::ASCIIString,dict::Dict)
    write(file,"\n\n&"*namelist*"\n")
    for key in keys(dict)
       if typeof(dict[key]) == ASCIIString
-         string = " "*key*" = \""*string(dict[key])*"\""
+         string = " "*key*"=\""*dict[key]*"\""
       elseif typeof(dict[key]) == Bool
-         string = " "*key*" = ."*string(dict[key])*"."
+         string = " "*key*"=."*string(dict[key])*"."
       else
-         string = " "*key*" = "*string(dict[key])
+         string = " "*key*"="*string(dict[key])
       end
-      write(file,string"\n")
+      write(file,string*"\n")
    end
    write(file,"/")
 end
@@ -226,3 +229,4 @@ function createInputFile(filename::ASCIIString,p::GS2params,spec::Array{GS2speci
    
 end
 
+end
