@@ -72,9 +72,8 @@ type GS2geometry
    tripri::Float64
    rmaj::Float64
    r_geo::Float64
-
 end
-GS2geometry(;equilibrium_option="eik",rhoc="0.5",irho=2,qinp=1.0,shat=1.0,shift=0.0,akappa=0.0,kappri=0.0,tri=0.0,tripri=0.0,rmaj=3.0,r_geo=-1.0)=GS2geometry(equilibrium_option,rhoc,irho,qinp,shat,shift,akappa,kappri,tri,tripri,rmaj,r_geo)
+GS2geometry(;equilibrium_option="eik",rhoc="0.5",irho=2,qinp=1.0,shat=1.0,shift=0.0,akappa=0.0,akappri=0.0,tri=0.0,tripri=0.0,rmaj=3.0,r_geo=-1.0)=GS2geometry(equilibrium_option,rhoc,irho,qinp,shat,shift,akappa,akappri,tri,tripri,rmaj,r_geo)
 
    # internal logic: linear
 
