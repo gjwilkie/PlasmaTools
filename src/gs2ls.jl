@@ -16,7 +16,7 @@ type GS2species
    vnewk::Float64
    electron::Bool
 end
-GS2species(;mass=-1.0,z=-999.0,dens=-1.0,temp=-1.0,vnewk=-1.0,fprim=-999.0,tprim=-999.0,electron=false) =GS2species(z,mass,dens,temp,fprim,tprim,vnewk,electron)
+GS2species(;mass=1.0,z=1.0,dens=1.0,temp=1.0,vnewk=0.0,fprim=0.0,tprim=0.0,electron=false) =GS2species(z,mass,dens,temp,fprim,tprim,vnewk,electron)
 
 """
 GS2resolution(ntheta,negrid,ngauss,delt,linear,kx,ky,nperiod,nx,ny,y0)
@@ -321,15 +321,14 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
       dict["write_omavg"] = false
       dict["omegatol"] = -0.0001
       dict["save_for_restart"] = true
-      
    end
    dict["write_hrate"] = false
    dict["write_eigenfunc"] = true
    dict["write_final_fields"] = true
    dict["write_final_moments"] = true
-   dict["nsave"] = 100
-   dict["nwrite"] = 10
-   dict["navg"] = 10
+   dict["nsave"] = 500
+   dict["nwrite"] = 50
+   dict["navg"] = 50
    dict["omegatinst"] = 500.0
    dict["write_phi_over_time"] = p.writephi
 

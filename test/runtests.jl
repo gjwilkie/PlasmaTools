@@ -10,9 +10,9 @@ r = GS2resolution(nperiod=3,ky=0.2)
 p = GS2params(runname="gs2ls_test",beta=0.003)
 
 specs = GS2species[]
-push!(specs, GS2species(dens=0.5,temp=1.0,mass=1.0,z=1.0,tprim=3.0,fprim=1.0))
-push!(specs, GS2species(dens=0.5,temp=1.0,mass=1.5,z=1.0,tprim=3.0,fprim=1.0))
-push!(specs, GS2species(dens=1.0,temp=1.1,mass=0.0002,z=-1.0,tprim=2.5,fprim=1.0))
+push!(specs, GS2species(dens=0.5,temp=1.0,mass=1.0,z=1.0,tprim=3.0,fprim=1.0,vnewk=0.01))
+push!(specs, GS2species(dens=0.5,temp=1.0,mass=1.5,z=1.0,tprim=3.0,fprim=1.0,vnewk=0.01))
+push!(specs, GS2species(dens=1.0,temp=1.1,mass=0.0002,z=-1.0,tprim=2.5,fprim=1.0,vnewk=0.6))
 
 createInputFile("gs2ls_test.in",p,r,g,specs)
 info("Wrote a gs2 input file: gs2ls_test.in. Check for correctness.")
