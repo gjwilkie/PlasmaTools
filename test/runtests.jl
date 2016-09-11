@@ -3,7 +3,7 @@ using PlasmaTools
 using Base.Test
 
 # Testing gs2ls
-g = GS2geometry(equilibrium_option="eik",rhoc=0.6,irho=2,qinp=2.0,shat=1.0,shift=-0.1,akappa=0.2,rmaj=3.0,r_geo=3.1)
+g = GS2geometry(equilibrium_option="eik",rhoc=0.6,irho=2,qinp=2.0,shat=1.0,shift=-0.1,akappa=0.2,rmaj=3.0,r_geo=2.9)
 
 r = GS2resolution(nperiod=3,ky=0.2)
 

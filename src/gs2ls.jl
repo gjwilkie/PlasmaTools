@@ -330,7 +330,7 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
    dict["nsave"] = 100
    dict["nwrite"] = 10
    dict["navg"] = 10
-   dict["omegainst"] = 500.0
+   dict["omegatinst"] = 500.0
    dict["write_phi_over_time"] = p.writephi
 
    writeNamelist(f,"gs2_diagnostics_knobs",dict)
