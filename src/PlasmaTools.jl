@@ -21,6 +21,6 @@ export el,me,mp,kB,ep0
 export SpeciesData
 export Grid,createFVgrid,createAdvecDiffOperator
 export slowingDownTime, nu_s, nu_par, collisionOperator, lnLambda, nuhat, gfunc
-#export createInputFile
+export createInputFile, GS2species, GS2resolution, GS2params, GS2geometry
 
 end

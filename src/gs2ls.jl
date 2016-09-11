@@ -1,7 +1,7 @@
 module gs2ls
 using NetCDF
 
-export createInputFile
+export createInputFile, GS2species, GS2resolution, GS2params, GS2geometry
 
 """
 GS2species: an encapsulation of data related to each species in a gs2 input file
@@ -16,7 +16,7 @@ type GS2species
    vnewk::Float64
    electron::Bool
 end
-SpeciesData(;mass=-1.0,z=-999.0,dens=-1.0,temp=-1.0,vnewk=-1.0,fprim=-999.0,tprim=-999.0,electron=false) =SpeciesData(z,mass,dens,temp,fprim,tprim,vnewk,electron)
+GS2species(;mass=-1.0,z=-999.0,dens=-1.0,temp=-1.0,vnewk=-1.0,fprim=-999.0,tprim=-999.0,electron=false) =GS2species(z,mass,dens,temp,fprim,tprim,vnewk,electron)
 
 """
 GS2resolution(ntheta,negrid,ngauss,delt,linear,kx,ky,nperiod,nx,ny,y0)
@@ -91,13 +91,13 @@ function writeNamelist(file::IOStream,namelist::ASCIIString,dict::Dict)
    write(file,"\n\n&"*namelist*"\n")
    for key in keys(dict)
       if typeof(dict[key]) == ASCIIString
-         string = " "*key*"=\""*dict[key]*"\""
+         line = " "*key*"=\""*dict[key]*"\""
       elseif typeof(dict[key]) == Bool
-         string = " "*key*"=."*string(dict[key])*"."
+         line = " "*key*"=."*string(dict[key])*"."
       else
-         string = " "*key*"="*string(dict[key])
+         line = " "*key*"="*string(dict[key])
       end
-      write(file,string*"\n")
+      write(file,line*"\n")
    end
    write(file,"/")
 end
@@ -114,12 +114,12 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
       g.r_geo = g.rmaj
    end
    if r.nx < 0                               
-      g.nx = g.ny
+      r.nx = r.ny
    end
    if abs(p.fapar) > 0.0 && p.beta < 0.0
       error("Must specify beta when fapar>0")
    end
-   if p.equilibrium_option == "s-alpha" && p.beta < 0.0
+   if g.equilibrium_option == "s-alpha" && p.beta < 0.0
       warn("shift set equal to zero because beta=0.0")
       beta = 0.0
    end
@@ -134,17 +134,24 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
 
    # Calculate derived quantities
    nspec = length(spec)
+
+   maxmass = 0.0
    for is in 1:nspec
-      if spec[is].electron
+      maxmass = max(maxmass,spec[is].mass)
+   end
+   for is in 1:nspec
+      if (spec[is].mass < maxmass*1.0e-3) && (spec[is].z == -1.0)
+         spec[is].electron = true
          ne = spec[is].dens
       end
    end
    zeff = 0.0
+   ne = 1.0
    for is in 1:nspec
       if spec[is].electron
          ne = spec[is].dens
       else
-         zeff = zeff + spec[is].z^2*spec[is]*dens
+         zeff = zeff + spec[is].z^2*spec[is].dens
       end
    end
    zeff = zeff/ne
@@ -157,24 +164,32 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
       boundary_option="linked"
    end
 
+   eps = g.rhoc/g.rmaj
+   epsl = 2.0/g.rmaj
+   pk = epsl/g.qinp
 
-   eps = rhoc/rmaj
-   epsl = 2.0/rmaj
-   pk = epsl/qinp
+   # Calculate pressure gradient and shift (for salpha)
+   prestot = 0.0
+   prestot_prime = 0.0
+   totcharge = 0.0
+   totcharge_prim = 0.0
+   for is in 1:nspec
+      prestot = prestot + spec[is].dens*spec[is].temp
+      prestot_prime = prestot_prime - spec[is].dens*spec[is].temp.*(spec[is].fprim + spec[is].tprim)
+      totcharge = totcharge + spec[is].dens.*spec[is].z
+      totcharge_prim = totcharge_prim + spec[is].dens.*spec[is].z.*spec[is].fprim
+   end
+   beta_prime = p.beta * prestot_prime/prestot
 
-   prestot_prime = -sum(spec[:].dens.*spec[:].temp.*(spec[:].fprim + spec[:].tprim))
-   prestot = sum(spec[:].dens.*spec[:].temp)
-   beta_prime = beta * prestot_prime/prestot
-
-   if equilibrium_option == "s-alpha"
+   if g.equilibrium_option == "s-alpha"
       g.shift = -g.qinp^2 * rmaj * beta_prime
    end
 
-   totcharge = sum(spec[:].dens.*spec[:].z)
-   totcharge_prim = sum(spec[:].dens.*spec[:].z.*spec[:].fprim)
+   # Check quasineutrality
    abs(totcharge) < 1.0e-3 || warn("Equilibrium quasineutrality not satisfied")
    abs(totcharge_prim) < 1.0e-3 || warn("Equilibrium quasineutrality gradient not satisfied")
 
+   # Enforce electronhood
   
    ######################################## 
    # parameters
@@ -198,20 +213,20 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
 
    ######################################## 
    # theta_grid_knobs
-   writeNamelist(f, "theta_grid_knobs", Dict("equilibrium_option"=>equilibrium_option))
+   writeNamelist(f, "theta_grid_knobs", Dict("equilibrium_option"=>g.equilibrium_option))
 
    ######################################## 
    # theta_grid_parameters
    # theta_grid_salpha_knobs
    # theta_grid_eik_knobs
-   if equilibrium_option == "s-alpha"
+   if g.equilibrium_option == "s-alpha"
       dict = Dict("ntheta"=>r.ntheta,"nperiod"=>r.nperiod,"shat"=>g.shat,"shift",g.shift,"eps"=>eps,"epsl"=>epsl,"pk",pk)
       writeNamelist(f, "theta_grid_parameters", dict)
 
       writeNamelist(f, "theta_grid_salpha_knobs", Dict("model_option"=>"s-alpha"))
-   elseif equilibrium_option == "eik"
+   elseif g.equilibrium_option == "eik"
 
-      dict = Dict("ntheta"=>r.ntheta,"nperiod"=>r.nperiod,"rhoc"=>g.rhoc,"qinp"=>g.qinp,"shat"=>g.shat,"shift",g.shift,"rmaj"=>g.rmaj,"r_geo"=>g.r_geo,"akappa"=>g.akappa,"akappri"=>g.akappri,"tri"=>g.tri,"tripri"=>g.tripri)
+      dict = Dict("ntheta"=>r.ntheta,"nperiod"=>r.nperiod,"rhoc"=>g.rhoc,"qinp"=>g.qinp,"shat"=>g.shat,"shift"=>g.shift,"rmaj"=>g.rmaj,"r_geo"=>g.r_geo,"akappa"=>g.akappa,"akappri"=>g.akappri,"tri"=>g.tri,"tripri"=>g.tripri)
       writeNamelist(f, "theta_grid_parameters", dict)
 
       dict = Dict("iflux"=>0,"itor"=>1,"irho"=>g.irho,"local_eq"=>true,"bishop"=>4,"delrho"=>0.001,"s_hat_input"=>g.shat,"beta_prime_input"=>beta_prime)
@@ -253,7 +268,7 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
 
    ######################################## 
    # nonlinear_terms_knobs
-   if linear
+   if r.linear
       writeNamelist(f, "nonlinear_terms_knobs", Dict("nonlinear_mode"=>"off","flow_mode"=>"off","cfl"=>0.5))
    else
       writeNamelist(f, "nonlinear_terms_knobs", Dict("nonlinear_mode"=>"on","flow_mode"=>"off","cfl"=>0.5))
@@ -279,41 +294,45 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
 
    ######################################## 
    # init_g_knobs
-   dict = Dict("phiinit"=>0.001,"restart_file",p.runname*".nc","ginit_option"=>"noise","restart_dir"=>"restartdir")
+   dict = Dict("phiinit"=>0.001,"restart_file"=>p.runname*".nc","ginit_option"=>"noise","restart_dir"=>"restartdir")
    writeNamelist(f, "init_g_knobs",dict)
 
    ######################################## 
    # gs2_diagnostics_knobs
-   dict = Dict[]
-   push!(dict,("write_flux_e"=>p.fluxe,"write_eflux"=>p.fluxe))
-   push!(dict,("write_flux_emu"=>p.fluxemu))
-   push!(dict,("print_flux_line",false))
-   if linear
-      push!(dict,("write_nl_flux",false))
-      push!(dict,("print_line",true))
-      push!(dict,("write_line",true))
-      push!(dict,("write_omega",true))
-      push!(dict,("write_omavg",true))
-      push!(dict,("omegatol",0.0001))
-      push!(dict,("save_for_restart",false))
+   dict = Dict{ASCIIString,Any}()
+   dict["write_flux_emu"] = p.fluxemu
+   dict["print_flux_line"] = false
+   dict["write_flux_e"] = p.fluxe
+   dict["write_eflux"] = p.fluxe
+
+   if r.linear
+      dict["write_nl_flux"] = false
+      dict["print_line"] = true
+      dict["write_line"] = true
+      dict["write_omega"] = true
+      dict["write_omavg"] = true
+      dict["omegatol"] = 0.0001
+      dict["save_for_restart"] = false
    else
-      push!(dict,("write_nl_flux",true))
-      push!(dict,("print_line",false))
-      push!(dict,("write_line",false))
-      push!(dict,("write_omega",false))
-      push!(dict,("write_omavg",false))
-      push!(dict,("omegatol",-0.0001))
-      push!(dict,("save_for_restart",true))
+      dict["write_nl_flux"] = true
+      dict["print_line"] = false
+      dict["write_line"] = false
+      dict["write_omega"] = false
+      dict["write_omavg"] = false
+      dict["omegatol"] = -0.0001
+      dict["save_for_restart"] = true
+      
    end
-   push!(dict,("write_hrate",false))
-   push!(dict,("write_eigenfunc",true))
-   push!(dict,("write_final_fields",true))
-   push!(dict,("write_final_moments",true))
-   push!(dict,("nsave",100))
-   push!(dict,("nwrite",10))
-   push!(dict,("navg",10))
-   push!(dict,("omegainst",500.0))
-   push!(dict,("write_phi_over_time",p.writephi))
+   dict["write_hrate"] = false
+   dict["write_eigenfunc"] = true
+   dict["write_final_fields"] = true
+   dict["write_final_moments"] = true
+   dict["nsave"] = 100
+   dict["nwrite"] = 10
+   dict["navg"] = 10
+   dict["omegainst"] = 500.0
+   dict["write_phi_over_time"] = p.writephi
+
    writeNamelist(f,"gs2_diagnostics_knobs",dict)
 
    # Close file
