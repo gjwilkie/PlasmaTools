@@ -43,7 +43,7 @@ GS2params(runname,cpu_time,fapar,fbpar,beta,tite,fluxe,fluxemu,writephi)
 """
 type GS2params
    # Simulation and diagnostic parameters
-   runname::ASCIIString
+   runname::String
    cpu_time::Float64
    fapar::Float64
    fbpar::Float64
@@ -60,7 +60,7 @@ GS2geometry(equilibrium_option,rhoc,irho,qinp,shat,akappa,kappri,tri,tripri,rmaj
 """
 type GS2geometry
    # Geometry parameters
-   equilibrium_option::ASCIIString
+   equilibrium_option::String
    rhoc::Float64
    irho::Int64
    qinp::Float64
@@ -82,14 +82,14 @@ GS2geometry(;equilibrium_option="eik",rhoc="0.5",irho=2,qinp=1.0,shat=1.0,shift=
    # optional parameters: beta, tite, ky, kx, nx,ny, y0, nperiod, irho, rmaj, akappa, akappri,tri,tripri
 
 """
-writeNamelist(file::IOStream,namelist::ASCIIString,dict::Dict)
+writeNamelist(file::IOStream,namelist::String,dict::Dict)
 
 Takes a julia dictionary and string, and writes a fortran namelist to an already opened file.
 """
-function writeNamelist(file::IOStream,namelist::ASCIIString,dict::Dict)
+function writeNamelist(file::IOStream,namelist::String,dict::Dict)
    write(file,"\n\n&"*namelist*"\n")
    for key in keys(dict)
-      if typeof(dict[key]) == ASCIIString
+      if typeof(dict[key]) == String
          line = " "*key*"=\""*dict[key]*"\""
       elseif typeof(dict[key]) == Bool
          line = " "*key*"=."*string(dict[key])*"."
@@ -102,11 +102,11 @@ function writeNamelist(file::IOStream,namelist::ASCIIString,dict::Dict)
 end
 
 """
-createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::GS2geometry,spec::Array{GS2species,1})
+createInputFile(filename::String,p::GS2params,r::GS2resolution,g::GS2geometry,spec::Array{GS2species,1})
 
 Writes an individual GS2 input file base on provided data and internal logic
 """
-function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::GS2geometry,spec::Array{GS2species,1})
+function createInputFile(filename::String,p::GS2params,r::GS2resolution,g::GS2geometry,spec::Array{GS2species,1})
 
    # Check for defaults
    if g.r_geo < 0.0               
@@ -298,7 +298,7 @@ function createInputFile(filename::ASCIIString,p::GS2params,r::GS2resolution,g::
 
    ######################################## 
    # gs2_diagnostics_knobs
-   dict = Dict{ASCIIString,Any}()
+   dict = Dict{String,Any}()
    dict["write_flux_emu"] = p.fluxemu
    dict["print_flux_line"] = false
    dict["write_flux_e"] = p.fluxe

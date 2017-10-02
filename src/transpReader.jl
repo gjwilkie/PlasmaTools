@@ -7,11 +7,11 @@ using ..gs2ls: GS2specs, GS2geometry
 
 
 """
-plotSummary(file::ASCIIString)
+plotSummary(file::String)
 
 Displays a set of time-dependent plots of relevant plasma quantities. Useful for determining the overall health of the run and ideal time samples.
 """
-function plotTranspSummary(file::ASCIIString)
+function plotTranspSummary(file::String)
 
    t = ncread(file,"TIME")
    Ti0 = ncread(file,"TI0")
@@ -25,11 +25,11 @@ function plotTranspSummary(file::ASCIIString)
 end
 
 """
-plotSummary(file::ASCIIString,time::Float64)
+plotSummary(file::String,time::Float64)
 
 Displays a set of radius-dependent plots of relevant plasma quantities at the given time.
 """
-function plotTranspSummary(file::ASCIIString,time::Float64)
+function plotTranspSummary(file::String,time::Float64)
 
    # TODO: Make radial plots
    kappa = ncread(file,"ELONG")[1,:]
@@ -61,7 +61,7 @@ function getArrayAtTime(t::Float64,tgrid::Vector,ygrid::Vector)
 end
 
 
-function getLocalData(file::ASCIIString,rho::Float64,t0::Float64,Zi::Float64,Ai::Float64;Zz::Float64=-999.9,Az::Float64=-999.9)
+function getLocalData(file::String,rho::Float64,t0::Float64,Zi::Float64,Ai::Float64;Zz::Float64=-999.9,Az::Float64=-999.9)
 
    t = ncread(file,"TIME")
    x = getArrayAtTime(t0,t,ncread(file,"X"))
