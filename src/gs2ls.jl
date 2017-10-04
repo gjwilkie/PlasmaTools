@@ -1,7 +1,7 @@
 module gs2ls
 using NetCDF
 
-export createInputFile, GS2species, GS2resolution, GS2params, GS2geometry
+export createInputFile, GS2species, GS2resolution, GS2params, GS2geometry, timeavg
 
 """
 GS2species: an encapsulation of data related to each species in a gs2 input file
@@ -74,6 +74,13 @@ type GS2geometry
    r_geo::Float64
 end
 GS2geometry(;equilibrium_option="eik",rhoc="0.5",irho=2,qinp=1.0,shat=1.0,shift=0.0,akappa=0.0,akappri=0.0,tri=0.0,tripri=0.0,rmaj=3.0,r_geo=-1.0)=GS2geometry(equilibrium_option,rhoc,irho,qinp,shat,shift,akappa,akappri,tri,tripri,rmaj,r_geo)
+
+function timeavg(time,y,tavgfrac=-1.0)
+
+   tavgmin = time[1] + (1.0-tavg_frac)*(time[end]-time[1])
+   itmin = indmin(abs(time-tavgmin))
+   return =  sum( 0.5*(time[itmin+1:end]-time[itmin:end-1]).*(y[itmin+1:end]+y[itmin:end-1]))/(time[end]-time[itmin])
+end
 
    # internal logic: linear
 
