@@ -35,12 +35,19 @@ Returns ν∥ᵃᵇ(v) from Helander and Sigmar (2002), equation 3.47, where a a
 """
 function nu_par(v::Float64,a::SpeciesData,b::SpeciesData)
   vtb = sqrt(2.0 * b.temperature / b.mass)
-  return nuhatvta3(a,b)* 2.0 * gfunc(v/vtb) / v^3
+  if abs(v) .> eps(Float64)
+     return 0.0
+  else
+     return nuhatvta3(a,b)* 2.0 * gfunc(v/vtb) / v^3
+  end 
 end
 
 function nu_par(v::Vector,a::SpeciesData,b::SpeciesData)
   vtb = sqrt(2.0 * b.temperature / b.mass)
-  return nuhatvta3(a,b)* 2.0 * gfunc(v/vtb) ./ v.^3
+  y=zeros(length(v))
+  idx=abs(v) .> eps(Float64)
+  y[idx] = nuhatvta3(a,b)* 2.0 * gfunc(v[idx]/vtb) ./ v[idx].^3
+  return y
 end
 
 """
