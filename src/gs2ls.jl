@@ -77,7 +77,7 @@ GS2geometry(;equilibrium_option="eik",rhoc="0.5",irho=2,qinp=1.0,shat=1.0,shift=
 
 function timeavg(time,y,tavgfrac=-1.0)
 
-   tavgmin = time[1] + (1.0-tavg_frac)*(time[end]-time[1])
+   tavgmin = time[1] + (1.0-tavgfrac)*(time[end]-time[1])
    itmin = indmin(abs(time-tavgmin))
    return  sum( 0.5*(time[itmin+1:end]-time[itmin:end-1]).*(y[itmin+1:end]+y[itmin:end-1]))/(time[end]-time[itmin])
 end
