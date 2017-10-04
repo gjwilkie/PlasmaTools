@@ -184,9 +184,9 @@ slowingDownTime(a::SpeciesData, el::SpeciesData)
 
 Calculates the slowing-down time of species a against electrons where v_ta << v_te.
 """
-function slowingdowntime(a::SpeciesData, el::SpeciesData)
-   num = (3.0/(16.0*sqrt(pi)))*el.mass*a.mass*(2.0*el.temperature/el.mass)^1.5
-   return num/(a.charge*el^2*el.density*lnLambda(a,el))
+function slowingdowntime(a::SpeciesData, electron::SpeciesData)
+   num = (3.0/(16.0*sqrt(pi)))*electron.mass*a.mass*(2.0*electron.temperature/electron.mass)^1.5
+   return num/(a.charge*el^2*electron.density*lnLambda(a,electron))
 end
 
 end
