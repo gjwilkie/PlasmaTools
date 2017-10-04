@@ -55,7 +55,8 @@ function gfunc(x::Float64)
 end
 function gfunc(x::Vector)
    y=zeros(length(x))
-   y[abs(x) .> eps(Float64)] = (erf(x)-(2.0/sqrt(pi))*x.*exp(-x.^2))./(2.0*x.^2)
+   idx=abs(x) .> eps(Float64)
+   y[idx] = (erf(x[idx])-(2.0/sqrt(pi))*x[idx].*exp(-x[idx].^2))./(2.0*x[idx].^2)
    return y
 end
 
