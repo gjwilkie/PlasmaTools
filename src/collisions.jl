@@ -68,7 +68,8 @@ function Goverx(x::Float64)
 end
 function Goverx(x::Vector)
    y=zeros(length(x))
-   y[abs(x) .> eps(Float64)] = (erf(x)-(2.0/sqrt(pi))*x.*exp(-x.^2))./(2.0*x.^3)
+   idx=abs(x) .> eps(Float64)
+   y[idx] = (erf(x[idx])-(2.0/sqrt(pi))*x[idx].*exp(-x[idx].^2))./(2.0*x[idx].^3)
    y[abs(x) .<= eps(Float64)] = 2.0/(3.0*sqrt(pi)) 
    return y
 end
