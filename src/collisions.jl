@@ -10,7 +10,7 @@ using ..constants
 using ..species
 using ..grids
 
-export slowingDownTime, nu_s, nu_par, collisionOperator, lnLambda, nuhat, gfunc
+export slowingdowntime, nu_s, nu_par, collisionOperator, lnLambda, nuhat, gfunc
 
 """
 nu_s(v::Real, a::SpeciesData, b::SpeciesData)
