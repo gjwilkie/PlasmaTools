@@ -79,7 +79,7 @@ function timeavg(time,y,tavgfrac=-1.0)
 
    tavgmin = time[1] + (1.0-tavg_frac)*(time[end]-time[1])
    itmin = indmin(abs(time-tavgmin))
-   return =  sum( 0.5*(time[itmin+1:end]-time[itmin:end-1]).*(y[itmin+1:end]+y[itmin:end-1]))/(time[end]-time[itmin])
+   return  sum( 0.5*(time[itmin+1:end]-time[itmin:end-1]).*(y[itmin+1:end]+y[itmin:end-1]))/(time[end]-time[itmin])
 end
 
    # internal logic: linear
