@@ -181,10 +181,10 @@ function lnLambda(s1::SpeciesData, s2::SpeciesData)
   # Ion-ion collision
   else
     Z1 = s1.charge/el; Z2 = s2.charge/el
-    m1 = s1.mass; m2 = s2.mass
-    n1 = s1.density; n2 = s2.density
-    T1 = s1.temperature; T2 = s2.temperature
-    return 23.0 - log(1.e-3*el^1.5) - log( abs(Z1*Z2)* (m1+m2)*sqrt( (n1*Z1^2/T1) + (n2*Z2^2/T2)) /(m1*T2 + m2*T1 ))
+    m1 = s1.mass/mp; m2 = s2.mass/mp
+    n1 = s1.density*1.0e-6; n2 = s2.density*1.0e-6
+    T1 = s1.temperature/el; T2 = s2.temperature/el
+    return 23.0 - log( abs(Z1*Z2)* (m1+m2)*sqrt( (n1*Z1^2/T1) + (n2*Z2^2/T2)) /(m1*T2 + m2*T1 ))
   end
 end
 
