@@ -80,8 +80,8 @@ source = f0anal.*( (D0/vti^2)*(4.0*(vgrid.ctr.^2/vti^2) - 2.0) - 2.0*vgrid.ctr*A
 
 operator = createAdvecDiffOperator(vgrid,onefunc,Afunc,Dfunc,[0.0,0.0],source)
 f0test = operator\source
-println(f0test)
-println(f0anal)
+#println(f0test)
+#println(f0anal)
 @test_approx_eq_eps(f0test,f0anal,1.0e-3)
 
 

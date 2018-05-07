@@ -50,6 +50,16 @@ function nu_par(v::Vector,a::SpeciesData,b::SpeciesData)
   return y
 end
 
+function nu_D(v::Vector,a::SpeciesData,b::SpeciesData)
+  vtb = sqrt(2.0 * b.temperature / b.mass)
+  vta = sqrt(2.0 * a.temperature / a.mass)
+  y=zeros(length(v))
+  idx=abs(v) .> eps(Float64)
+  y[idx] = nuhatvta3(a,b)* (erf(v[idx]/vtb) - gfunc(v[idx]/vtb)) ./ (v[idx]/vta).^3
+  return y
+end
+
+
 """
 Chandresekhar G function
 """
@@ -199,3 +209,4 @@ function slowingdowntime(a::SpeciesData, electron::SpeciesData)
 end
 
 end
+
